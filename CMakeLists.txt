@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.15)
+
+project(logfilter)
+
+find_package (PkgConfig REQUIRED)
+pkg_check_modules (GTK2 REQUIRED gtk+-3.0)
+
+set(CMAKE_CXX_STANDARD 14)
+
+include_directories (${GTK2_INCLUDE_DIRS})
+
+link_directories (${GTK2_LIBRARY_DIRS})
+
+add_executable(logfilter main.cpp)
+
+
+add_definitions (${GTK2_CFLAGS_OTHER})
+target_link_libraries (logfilter ${GTK2_LIBRARIES})
+
+
+
