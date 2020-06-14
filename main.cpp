@@ -36,7 +36,7 @@ GdkRGBA *parseGdkRgba(int red, int green, int blue, int a) {
 void initLogList(GtkWidget *logdirList) {
     for (int i = 0; i < 10; ++i) {
         GtkWidget *label1 = gtk_button_new_with_label("~/lgos/log3/.log/log/log/lk/log");
-        gtk_button_set_alignment(reinterpret_cast<GtkButton *>(label1), 0, 0);
+        gtk_button_set_alignment(GTK_BUTTON(label1), 0, 0);
         gtk_box_pack_start(GTK_BOX(logdirList), label1, FALSE, FALSE, 0);
     }
 }
@@ -58,15 +58,14 @@ int main(int argc, char **argv) {
     gtk_box_pack_start(GTK_BOX(rootVbox), title1HBox, FALSE, FALSE, 0);
 
     // 内容布局
-    GtkWidget *content2Hbox = gtk_hbox_new(FALSE, 0);
-//    GtkWidget *content2Hpaned = gtk_hpaned_new();
+    GtkWidget *content2Hpaned = gtk_hpaned_new();
 
-    gtk_box_pack_start(GTK_BOX(rootVbox), content2Hbox, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(rootVbox), content2Hpaned, TRUE, TRUE, 0);
 
     // 内容左
     GtkWidget *content2LeftWin = gtk_scrolled_window_new(NULL, NULL);
-    gtk_widget_set_size_request(content2LeftWin,130, 0);
-    gtk_box_pack_start(GTK_BOX(content2Hbox), content2LeftWin, FALSE, FALSE, 0);
+    gtk_widget_set_size_request(content2LeftWin,230, 0);
+    gtk_paned_add1(GTK_PANED(content2Hpaned), content2LeftWin);
 
     GtkWidget *content2LeftVBox = gtk_vbox_new(FALSE, 0);
     gtk_container_add(GTK_CONTAINER(content2LeftWin), content2LeftVBox);
@@ -74,7 +73,7 @@ int main(int argc, char **argv) {
 
     // 内容右
     GtkWidget *content2RightBox = gtk_scrolled_window_new(NULL, NULL);
-    gtk_box_pack_start(GTK_BOX(content2Hbox), content2RightBox, TRUE, TRUE, 3);
+    gtk_paned_add2(GTK_PANED(content2Hpaned), content2RightBox);
 
 
 
@@ -94,7 +93,7 @@ int main(int argc, char **argv) {
 
     GtkWidget *filterEdit = gtk_entry_new();
     gtk_widget_set_size_request(filterEdit, 600, 0);
-    gtk_box_pack_start(GTK_BOX(title0HBox), filterEdit, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(title0HBox), filterEdit, TRUE, TRUE, 0);
 
 
 
@@ -108,7 +107,7 @@ int main(int argc, char **argv) {
 
     GtkWidget *removeTagEdit = gtk_entry_new();
     gtk_widget_set_size_request(removeTagEdit, 600, 0);
-    gtk_box_pack_start(GTK_BOX(title1HBox), removeTagEdit, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(title1HBox), removeTagEdit, TRUE, TRUE, 0);
 
 
     // left log dir list
