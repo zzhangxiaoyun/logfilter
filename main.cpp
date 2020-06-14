@@ -59,7 +59,6 @@ int main(int argc, char **argv) {
 
     // 内容布局
     GtkWidget *content2Hpaned = gtk_hpaned_new();
-
     gtk_box_pack_start(GTK_BOX(rootVbox), content2Hpaned, TRUE, TRUE, 0);
 
     // 内容左
@@ -70,12 +69,9 @@ int main(int argc, char **argv) {
     GtkWidget *content2LeftVBox = gtk_vbox_new(FALSE, 0);
     gtk_container_add(GTK_CONTAINER(content2LeftWin), content2LeftVBox);
 
-
     // 内容右
     GtkWidget *content2RightBox = gtk_scrolled_window_new(NULL, NULL);
     gtk_paned_add2(GTK_PANED(content2Hpaned), content2RightBox);
-
-
 
     //创建按钮
     GtkWidget *openLogDir = gtk_button_new_with_label("Open log dir");
@@ -95,8 +91,6 @@ int main(int argc, char **argv) {
     gtk_widget_set_size_request(filterEdit, 600, 0);
     gtk_box_pack_start(GTK_BOX(title0HBox), filterEdit, TRUE, TRUE, 0);
 
-
-
     // remove tag
     GtkWidget *empty = gtk_label_new("");
     gtk_widget_set_size_request(empty, 82, 0);
@@ -109,27 +103,19 @@ int main(int argc, char **argv) {
     gtk_widget_set_size_request(removeTagEdit, 600, 0);
     gtk_box_pack_start(GTK_BOX(title1HBox), removeTagEdit, TRUE, TRUE, 0);
 
-
     // left log dir list
     initLogList(content2LeftVBox);
-
 
     // text
     GtkWidget *textView = gtk_text_view_new();
     gtk_widget_set_size_request(removeTagEdit, 600, 0);
 
-
     gtk_widget_modify_bg(textView, GTK_STATE_NORMAL, parseGdkColor(0x0, 0x0, 0x0));
     gtk_widget_override_color(textView, GTK_STATE_FLAG_NORMAL, parseGdkRgba(0xffff, 0xffff, 0xffff, 0xffff));
 
 
-
-
     gtk_container_add(GTK_CONTAINER(content2RightBox), textView);
     gtk_text_view_set_editable(GTK_TEXT_VIEW(textView), TRUE);
-
-
-
 
 
     //显示主窗口控件及其所有子控件
