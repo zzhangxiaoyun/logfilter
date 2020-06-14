@@ -1,11 +1,15 @@
 #include <gtk/gtk.h>
+#include <iostream>
 
 /**
 *callback function of button
 *@param w widget
 *@param userdata
 */
-void hello_proc(GtkWidget *w, gpointer userdata) {
+void choosefile(GtkWidget *w, gpointer userdata) {
+    std::cout<< " choosefile" << std::endl;
+//    GtkWidget *widget = gtk_file_chooser_dialog_new(&"file choose", (GdkWindow*)userdata, GTK_FILE_CHOOSER_ACTION_OPEN, &"确定");
+
 
 }
 
@@ -29,6 +33,14 @@ GdkRGBA *parseGdkRgba(int red, int green, int blue, int a) {
     return color;
 }
 
+void initLogList(GtkWidget *logdirList) {
+    for (int i = 0; i < 10; ++i) {
+        GtkWidget *label1 = gtk_button_new_with_label("~/lgos/log3/.log/log/log/lk/log");
+        gtk_button_set_alignment(reinterpret_cast<GtkButton *>(label1), 0, 0);
+        gtk_box_pack_start(GTK_BOX(logdirList), label1, FALSE, FALSE, 0);
+    }
+}
+
 int main(int argc, char **argv) {
     gtk_init(&argc, &argv);
     GtkWidget *mainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -45,11 +57,24 @@ int main(int argc, char **argv) {
     GtkWidget *title1HBox = gtk_hbox_new(FALSE, 5);
     gtk_box_pack_start(GTK_BOX(rootVbox), title1HBox, FALSE, FALSE, 0);
 
-    GtkWidget *scroll2HBox = gtk_scrolled_window_new(NULL, NULL);
-    gtk_box_pack_start(GTK_BOX(rootVbox), scroll2HBox, TRUE, TRUE, 0);
+    // 内容布局
+    GtkWidget *content2Hbox = gtk_hbox_new(FALSE, 0);
+//    GtkWidget *content2Hpaned = gtk_hpaned_new();
+
+    gtk_box_pack_start(GTK_BOX(rootVbox), content2Hbox, TRUE, TRUE, 0);
+
+    // 内容左
+    GtkWidget *content2LeftWin = gtk_scrolled_window_new(NULL, NULL);
+    gtk_widget_set_size_request(content2LeftWin,130, 0);
+    gtk_box_pack_start(GTK_BOX(content2Hbox), content2LeftWin, FALSE, FALSE, 0);
+
+    GtkWidget *content2LeftVBox = gtk_vbox_new(FALSE, 0);
+    gtk_container_add(GTK_CONTAINER(content2LeftWin), content2LeftVBox);
 
 
-
+    // 内容右
+    GtkWidget *content2RightBox = gtk_scrolled_window_new(NULL, NULL);
+    gtk_box_pack_start(GTK_BOX(content2Hbox), content2RightBox, TRUE, TRUE, 3);
 
 
 
@@ -61,7 +86,7 @@ int main(int argc, char **argv) {
     //将按钮加入到布局中
     gtk_box_pack_start(GTK_BOX(title0HBox), openLogDir, FALSE, FALSE, 0);
     //为按钮加入单击事件响应函数
-    g_signal_connect(G_OBJECT(openLogDir), "clicked", G_CALLBACK(hello_proc), NULL);
+    g_signal_connect(G_OBJECT(openLogDir), "clicked", G_CALLBACK(choosefile), mainWindow);
 
     // filter
     GtkWidget *filterLabel = gtk_label_new("filter tags:");
@@ -86,6 +111,10 @@ int main(int argc, char **argv) {
     gtk_box_pack_start(GTK_BOX(title1HBox), removeTagEdit, FALSE, FALSE, 0);
 
 
+    // left log dir list
+    initLogList(content2LeftVBox);
+
+
     // text
     GtkWidget *textView = gtk_text_view_new();
     gtk_widget_set_size_request(removeTagEdit, 600, 0);
@@ -97,10 +126,9 @@ int main(int argc, char **argv) {
 
 
 
-    gtk_container_add(GTK_CONTAINER(scroll2HBox), textView);
+    gtk_container_add(GTK_CONTAINER(content2RightBox), textView);
     gtk_text_view_set_editable(GTK_TEXT_VIEW(textView), TRUE);
-    GtkWidget *statusbar = gtk_statusbar_new();
-    gtk_container_add(GTK_CONTAINER(scroll2HBox), statusbar);
+
 
 
 
