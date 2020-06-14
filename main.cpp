@@ -21,11 +21,13 @@ GdkColor *parseGdkColor(int red, int green, int blue) {
     color->red = red;
     color->blue = blue;
     color->green = green;
+    color->pixel = 0xffff;
     return color;
 }
 
-GdkRGBA *parseGdkRgba(int red, int green, int blue, int a) {
+GdkRGBA *parseGdkRgba(double red, double green, double blue, double a) {
     GdkRGBA *color = new GdkRGBA();
+
     color->red = red;
     color->blue = blue;
     color->green = green;
@@ -39,6 +41,20 @@ void initLogList(GtkWidget *logdirList) {
         gtk_button_set_alignment(GTK_BUTTON(label1), 0, 0);
         gtk_box_pack_start(GTK_BOX(logdirList), label1, FALSE, FALSE, 0);
     }
+}
+
+void ininTextView(GtkWidget *textview) {
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
+
+    GtkTextIter iter;
+
+
+    gtk_text_buffer_get_iter_at_offset(buffer, &iter, 0);
+
+    gtk_text_buffer_insert(buffer, &iter, "Plain text\n", -1);
+
+
+
 }
 
 int main(int argc, char **argv) {
@@ -110,12 +126,16 @@ int main(int argc, char **argv) {
     GtkWidget *textView = gtk_text_view_new();
     gtk_widget_set_size_request(removeTagEdit, 600, 0);
 
-    gtk_widget_modify_bg(textView, GTK_STATE_NORMAL, parseGdkColor(0x0, 0x0, 0x0));
-    gtk_widget_override_color(textView, GTK_STATE_FLAG_NORMAL, parseGdkRgba(0xffff, 0xffff, 0xffff, 0xffff));
+
+    gtk_widget_override_background_color(textView, GTK_STATE_FLAG_NORMAL, parseGdkRgba(0, 0, 0, 1));
+    gtk_widget_override_background_color(textView, GTK_STATE_FLAG_SELECTED, parseGdkRgba(0, 0.4, 0.4, 1));
+    gtk_widget_override_color(textView, GTK_STATE_FLAG_NORMAL, parseGdkRgba(1, 1, 1, 1));
 
 
     gtk_container_add(GTK_CONTAINER(content2RightBox), textView);
     gtk_text_view_set_editable(GTK_TEXT_VIEW(textView), TRUE);
+
+    ininTextView(textView);
 
 
     //显示主窗口控件及其所有子控件
