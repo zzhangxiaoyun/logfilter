@@ -25,8 +25,10 @@ public:
             pos2 = str.find(spacer, pos1);    // 从str的pos1位置开始搜寻spacer
         }
 //        if (pos1 != str.length())  {
-        v.push_back(str.substr(pos1));
 //        }
+        if (str.length() > 0) {
+            v.push_back(str.substr(pos1));
+        }
         return v;
     }
 

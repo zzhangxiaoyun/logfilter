@@ -11,11 +11,6 @@
 *@param userdata
 */
 
-LogFilter *logFilter;
-GtkTextBuffer *buffer;
-
-GtkWidget *filterTagEdit;
-GtkWidget *ignoreTagEdit;
 
 void choosefile(GtkWidget *w, gpointer userdata) {
     std::cout << " choosefile" << std::endl;
@@ -24,7 +19,7 @@ void choosefile(GtkWidget *w, gpointer userdata) {
 
 }
 
-void notifyTextView(list<string> filterTags, list<string> ignoreTags) {
+void notifyTextView(list<string> filterTags, list<string> ignoreTags, LogFilter *logFilter, GtkTextBuffer* buffer) {
 
     GtkTextIter iter;
     gtk_text_buffer_get_iter_at_offset(buffer, &iter, 0);
@@ -54,15 +49,18 @@ void notifyTextView(list<string> filterTags, list<string> ignoreTags) {
 
 
 void enterClicked(GtkWidget *w, gpointer userdata) {
-    const gchar *filterText = gtk_entry_get_text(GTK_ENTRY(filterTagEdit));
+    GtkWidget **gtkwidgets = (GtkWidget **)userdata;
+
+
+    const gchar *filterText = gtk_entry_get_text(GTK_ENTRY(gtkwidgets[0]));
     list<string> filterTags = Utils::split(string(filterText), "|");
 //    Utils::logList(&filterTags);
 
-    const gchar *ignoreText = gtk_entry_get_text(GTK_ENTRY(ignoreTagEdit));
+    const gchar *ignoreText = gtk_entry_get_text(GTK_ENTRY(gtkwidgets[1]));
     list<string> ignoreTags = Utils::split(string(ignoreText), "|");
 //    Utils::logList(&ignoreTags);
 
-    notifyTextView(filterTags, ignoreTags);
+    notifyTextView(filterTags, ignoreTags, (LogFilter*)gtkwidgets[2], (GtkTextBuffer*) gtkwidgets[3]);
 }
 
 #define WIDTH 1000
@@ -123,10 +121,9 @@ int main(int argc, char **argv) {
     GtkWidget *filterLabel = gtk_label_new("filter tags:");
     gtk_box_pack_start(GTK_BOX(title0HBox), filterLabel, FALSE, FALSE, 0);
 
-    filterTagEdit = gtk_entry_new();
+    GtkWidget *filterTagEdit = gtk_entry_new();
     gtk_widget_set_size_request(filterTagEdit, 600, 0);
     gtk_box_pack_start(GTK_BOX(title0HBox), filterTagEdit, TRUE, TRUE, 0);
-    g_signal_connect(G_OBJECT(filterTagEdit), "activate", G_CALLBACK(enterClicked), NULL);
 
     // ignore tag
     GtkWidget *empty = gtk_label_new("");
@@ -136,17 +133,15 @@ int main(int argc, char **argv) {
     GtkWidget *ignoreTagLabel = gtk_label_new("ignore tags:");
     gtk_box_pack_start(GTK_BOX(title1HBox), ignoreTagLabel, FALSE, FALSE, 0);
 
-    ignoreTagEdit = gtk_entry_new();
+    GtkWidget *ignoreTagEdit = gtk_entry_new();
     gtk_widget_set_size_request(ignoreTagEdit, 600, 0);
     gtk_box_pack_start(GTK_BOX(title1HBox), ignoreTagEdit, TRUE, TRUE, 0);
-    g_signal_connect(G_OBJECT(filterTagEdit), "activate", G_CALLBACK(enterClicked), NULL);
 
 
     // 确定按钮
     GtkWidget *enterButton = gtk_button_new_with_label("确定");
     gtk_widget_set_size_request(enterButton, 200, 0);
     gtk_box_pack_start(GTK_BOX(title1HBox), enterButton, FALSE, FALSE, 0);
-    g_signal_connect(G_OBJECT(enterButton), "clicked", G_CALLBACK(enterClicked), NULL);
 
 
     // left log dir list
@@ -164,9 +159,17 @@ int main(int argc, char **argv) {
 
     gtk_container_add(GTK_CONTAINER(content2RightBox), textView);
     gtk_text_view_set_editable(GTK_TEXT_VIEW(textView), TRUE);
-    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textView));
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textView));
 
-    logFilter = new LogFilter("/home/xy/1b/.log");
+
+    LogFilter *logFilter = new LogFilter("/home/xy/1b/.log");
+
+
+    void* gtkwidgets[] = {filterTagEdit, ignoreTagEdit, logFilter, buffer};
+
+    g_signal_connect(G_OBJECT(filterTagEdit), "activate", G_CALLBACK(enterClicked), gtkwidgets);
+    g_signal_connect(G_OBJECT(ignoreTagEdit), "activate", G_CALLBACK(enterClicked), gtkwidgets);
+    g_signal_connect(G_OBJECT(enterButton), "clicked", G_CALLBACK(enterClicked), gtkwidgets);
 
 
     //显示主窗口控件及其所有子控件
