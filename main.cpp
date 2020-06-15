@@ -1,5 +1,7 @@
 #include <gtk/gtk.h>
 #include <iostream>
+#include "LogFilter.h"
+
 
 /**
 *callback function of button
@@ -7,7 +9,7 @@
 *@param userdata
 */
 void choosefile(GtkWidget *w, gpointer userdata) {
-    std::cout<< " choosefile" << std::endl;
+    std::cout << " choosefile" << std::endl;
 //    GtkWidget *widget = gtk_file_chooser_dialog_new(&"file choose", (GdkWindow*)userdata, GTK_FILE_CHOOSER_ACTION_OPEN, &"确定");
 
 
@@ -16,14 +18,6 @@ void choosefile(GtkWidget *w, gpointer userdata) {
 #define WIDTH 1000
 #define HEIGHT 600
 
-GdkColor *parseGdkColor(int red, int green, int blue) {
-    GdkColor *color = new GdkColor();
-    color->red = red;
-    color->blue = blue;
-    color->green = green;
-    color->pixel = 0xffff;
-    return color;
-}
 
 GdkRGBA *parseGdkRgba(double red, double green, double blue, double a) {
     GdkRGBA *color = new GdkRGBA();
@@ -43,15 +37,34 @@ void initLogList(GtkWidget *logdirList) {
     }
 }
 
-void ininTextView(GtkWidget *textview) {
-    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));
+void ininTextView(GtkWidget *textview, LogFilter *logFilter) {
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));\
+
 
     GtkTextIter iter;
 
 
     gtk_text_buffer_get_iter_at_offset(buffer, &iter, 0);
 
-    gtk_text_buffer_insert(buffer, &iter, "Plain text\n", -1);
+
+    list<string> filterTags;
+    filterTags.push_back("Camera");
+    filterTags.push_back("Audio");
+    list<string> ignoreTags;
+    ignoreTags.push_back("CameraHal");
+
+
+    list<string> *filterLogs = logFilter->filter(filterTags, ignoreTags);
+
+    list<string>::iterator flit;
+    for (flit = filterLogs->begin(); flit != filterLogs->end(); ++flit) {
+        string line = *flit + "\n";
+        cout << "line:" << line << endl;
+        gtk_text_buffer_insert(buffer, &iter, line.data(), -1);
+    }
+
+
+
 
 
 
@@ -79,7 +92,7 @@ int main(int argc, char **argv) {
 
     // 内容左
     GtkWidget *content2LeftWin = gtk_scrolled_window_new(NULL, NULL);
-    gtk_widget_set_size_request(content2LeftWin,230, 0);
+    gtk_widget_set_size_request(content2LeftWin, 230, 0);
     gtk_paned_add1(GTK_PANED(content2Hpaned), content2LeftWin);
 
     GtkWidget *content2LeftVBox = gtk_vbox_new(FALSE, 0);
@@ -135,7 +148,10 @@ int main(int argc, char **argv) {
     gtk_container_add(GTK_CONTAINER(content2RightBox), textView);
     gtk_text_view_set_editable(GTK_TEXT_VIEW(textView), TRUE);
 
-    ininTextView(textView);
+    LogFilter *logFilter = new LogFilter("/home/xy/1b/.log");
+
+
+    ininTextView(textView, logFilter);
 
 
     //显示主窗口控件及其所有子控件
