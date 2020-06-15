@@ -17,35 +17,17 @@ GtkTextBuffer *buffer;
 GtkWidget *filterTagEdit;
 GtkWidget *ignoreTagEdit;
 
-
-
-
-GtkTextIter *tvBegin;
-GtkTextIter *tvEnd;
-
-
-
-
 void choosefile(GtkWidget *w, gpointer userdata) {
     std::cout << " choosefile" << std::endl;
 
 //    GtkWidget *widget = gtk_file_chooser_dialog_new(&"file choose", (GdkWindow*)userdata, GTK_FILE_CHOOSER_ACTION_OPEN, &"确定");
 
-
 }
 
-
-
 void notifyTextView(list<string> filterTags, list<string> ignoreTags) {
-//    if (tvBegin != nullptr && tvEnd != nullptr) {
-//        gtk_text_buffer_delete(buffer, tvBegin, tvEnd);
-//        tvBegin = nullptr;
-//        tvEnd = nullptr;
-//    }
 
     GtkTextIter iter;
     gtk_text_buffer_get_iter_at_offset(buffer, &iter, 0);
-    tvBegin = &iter;
 
     time_t fstart = clock();
 
@@ -55,13 +37,10 @@ void notifyTextView(list<string> filterTags, list<string> ignoreTags) {
     cout<<"filter it cost " << (int)((fend - fstart ) * 1000/CLOCKS_PER_SEC) <<" ms"<<endl;
 
 
-
     time_t pstart = clock();
     string logcontext = Utils::append(filterLogs);
     time_t pend = clock();
     cout<<"append it cost " << (int)((pend - pstart ) * 1000/CLOCKS_PER_SEC) <<" ms"<<endl;
-//    cout << "count:" << logcontext << endl;
-
 
     const gchar *strData = logcontext.data();
 
@@ -69,20 +48,7 @@ void notifyTextView(list<string> filterTags, list<string> ignoreTags) {
     gtk_text_buffer_set_text(buffer, strData,  strlen(strData));
     gdk_threads_leave();
 
-
-
     cout << "done" << endl;
-
-
-//    list<string>::iterator flit;
-//    for (flit = filterLogs->begin(); flit != filterLogs->end(); ++flit) {
-//        string line = *flit + "\n";
-//        cout<< "line:" << *flit << endl;
-//
-////        gtk_text_buffer_insert(buffer, &iter, line.data(), -1);
-////        gtk_text_buffer_set_text(buffer, line.data(), line.size());
-//    }
-//    tvEnd = &iter;
 }
 
 
@@ -101,7 +67,6 @@ void enterClicked(GtkWidget *w, gpointer userdata) {
 
 #define WIDTH 1000
 #define HEIGHT 600
-
 
 
 void initLogList(GtkWidget *logdirList) {
@@ -201,11 +166,7 @@ int main(int argc, char **argv) {
     gtk_text_view_set_editable(GTK_TEXT_VIEW(textView), TRUE);
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textView));
 
-
     logFilter = new LogFilter("/home/xy/1b/.log");
-
-
-
 
 
     //显示主窗口控件及其所有子控件
