@@ -11,7 +11,7 @@ include_directories (${GTK2_INCLUDE_DIRS})
 
 link_directories (${GTK2_LIBRARY_DIRS})
 
-add_executable(logfilter main.cpp)
+add_executable(logfilter main.cpp Utils.cpp Utils.h)
 
 
 add_definitions (${GTK2_CFLAGS_OTHER})

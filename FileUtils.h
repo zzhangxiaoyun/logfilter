@@ -89,12 +89,6 @@ public:
         return lines;
     }
 
-    static void logList(list<string> *list) {
-        std::list<string>::iterator it;
-        for (it = list->begin(); it != list->end(); ++it) {
-            cout << "line:" << *it << endl;
-        }
-    }
 };
 
 #endif //LOGREAD_FILESUTILS_H

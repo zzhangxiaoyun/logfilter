@@ -5,6 +5,7 @@
 #include <string>
 #include <list>
 #include "FileUtils.h"
+#include "Utils.h"
 
 #ifndef LOGREAD_LOGFILTER_H
 #define LOGREAD_LOGFILTER_H
@@ -18,7 +19,7 @@ public:
     LogFilter(string logdir) {
         list<string> files = FileUtils::scanFiles((char*)logdir.data());
         list<string> *logfiles = FileUtils::filterLogFiles(&files);
-        FileUtils::logList(logfiles);
+        Utils::logList(logfiles);
         this->loglines = FileUtils::files2lines(logfiles);
     }
 

@@ -1,6 +1,8 @@
 #include <gtk/gtk.h>
 #include <iostream>
 #include "LogFilter.h"
+#include "Utils.h"
+#include <time.h>
 
 
 /**
@@ -8,26 +10,99 @@
 *@param w widget
 *@param userdata
 */
+
+LogFilter *logFilter;
+GtkTextBuffer *buffer;
+
+GtkWidget *filterTagEdit;
+GtkWidget *ignoreTagEdit;
+
+
+
+
+GtkTextIter *tvBegin;
+GtkTextIter *tvEnd;
+
+
+
+
 void choosefile(GtkWidget *w, gpointer userdata) {
     std::cout << " choosefile" << std::endl;
+
 //    GtkWidget *widget = gtk_file_chooser_dialog_new(&"file choose", (GdkWindow*)userdata, GTK_FILE_CHOOSER_ACTION_OPEN, &"确定");
 
 
+}
+
+
+
+void notifyTextView(list<string> filterTags, list<string> ignoreTags) {
+//    if (tvBegin != nullptr && tvEnd != nullptr) {
+//        gtk_text_buffer_delete(buffer, tvBegin, tvEnd);
+//        tvBegin = nullptr;
+//        tvEnd = nullptr;
+//    }
+
+    GtkTextIter iter;
+    gtk_text_buffer_get_iter_at_offset(buffer, &iter, 0);
+    tvBegin = &iter;
+
+    time_t fstart = clock();
+
+    list<string> *filterLogs = logFilter->filter(filterTags, ignoreTags);
+
+    time_t fend = clock();
+    cout<<"filter it cost " << (int)((fend - fstart ) * 1000/CLOCKS_PER_SEC) <<" ms"<<endl;
+
+
+
+    time_t pstart = clock();
+    string logcontext = Utils::append(filterLogs);
+    time_t pend = clock();
+    cout<<"append it cost " << (int)((pend - pstart ) * 1000/CLOCKS_PER_SEC) <<" ms"<<endl;
+//    cout << "count:" << logcontext << endl;
+
+
+    const gchar *strData = logcontext.data();
+
+    gdk_threads_enter();
+    gtk_text_buffer_set_text(buffer, strData,  strlen(strData));
+    gdk_threads_leave();
+
+
+
+    cout << "done" << endl;
+
+
+//    list<string>::iterator flit;
+//    for (flit = filterLogs->begin(); flit != filterLogs->end(); ++flit) {
+//        string line = *flit + "\n";
+//        cout<< "line:" << *flit << endl;
+//
+////        gtk_text_buffer_insert(buffer, &iter, line.data(), -1);
+////        gtk_text_buffer_set_text(buffer, line.data(), line.size());
+//    }
+//    tvEnd = &iter;
+}
+
+
+
+void enterClicked(GtkWidget *w, gpointer userdata) {
+    const gchar *filterText = gtk_entry_get_text(GTK_ENTRY(filterTagEdit));
+    list<string> filterTags = Utils::split(string(filterText), "|");
+//    Utils::logList(&filterTags);
+
+    const gchar *ignoreText = gtk_entry_get_text(GTK_ENTRY(ignoreTagEdit));
+    list<string> ignoreTags = Utils::split(string(ignoreText), "|");
+//    Utils::logList(&ignoreTags);
+
+    notifyTextView(filterTags, ignoreTags);
 }
 
 #define WIDTH 1000
 #define HEIGHT 600
 
 
-GdkRGBA *parseGdkRgba(double red, double green, double blue, double a) {
-    GdkRGBA *color = new GdkRGBA();
-
-    color->red = red;
-    color->blue = blue;
-    color->green = green;
-    color->alpha = a;
-    return color;
-}
 
 void initLogList(GtkWidget *logdirList) {
     for (int i = 0; i < 10; ++i) {
@@ -35,39 +110,6 @@ void initLogList(GtkWidget *logdirList) {
         gtk_button_set_alignment(GTK_BUTTON(label1), 0, 0);
         gtk_box_pack_start(GTK_BOX(logdirList), label1, FALSE, FALSE, 0);
     }
-}
-
-void ininTextView(GtkWidget *textview, LogFilter *logFilter) {
-    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview));\
-
-
-    GtkTextIter iter;
-
-
-    gtk_text_buffer_get_iter_at_offset(buffer, &iter, 0);
-
-
-    list<string> filterTags;
-    filterTags.push_back("Camera");
-    filterTags.push_back("Audio");
-    list<string> ignoreTags;
-    ignoreTags.push_back("CameraHal");
-
-
-    list<string> *filterLogs = logFilter->filter(filterTags, ignoreTags);
-
-    list<string>::iterator flit;
-    for (flit = filterLogs->begin(); flit != filterLogs->end(); ++flit) {
-        string line = *flit + "\n";
-        cout << "line:" << line << endl;
-        gtk_text_buffer_insert(buffer, &iter, line.data(), -1);
-    }
-
-
-
-
-
-
 }
 
 int main(int argc, char **argv) {
@@ -116,42 +158,54 @@ int main(int argc, char **argv) {
     GtkWidget *filterLabel = gtk_label_new("filter tags:");
     gtk_box_pack_start(GTK_BOX(title0HBox), filterLabel, FALSE, FALSE, 0);
 
-    GtkWidget *filterEdit = gtk_entry_new();
-    gtk_widget_set_size_request(filterEdit, 600, 0);
-    gtk_box_pack_start(GTK_BOX(title0HBox), filterEdit, TRUE, TRUE, 0);
+    filterTagEdit = gtk_entry_new();
+    gtk_widget_set_size_request(filterTagEdit, 600, 0);
+    gtk_box_pack_start(GTK_BOX(title0HBox), filterTagEdit, TRUE, TRUE, 0);
+    g_signal_connect(G_OBJECT(filterTagEdit), "activate", G_CALLBACK(enterClicked), NULL);
 
-    // remove tag
+    // ignore tag
     GtkWidget *empty = gtk_label_new("");
     gtk_widget_set_size_request(empty, 82, 0);
     gtk_box_pack_start(GTK_BOX(title1HBox), empty, FALSE, FALSE, 0);
 
-    GtkWidget *removeTagLabel = gtk_label_new("remove tags:");
-    gtk_box_pack_start(GTK_BOX(title1HBox), removeTagLabel, FALSE, FALSE, 0);
+    GtkWidget *ignoreTagLabel = gtk_label_new("ignore tags:");
+    gtk_box_pack_start(GTK_BOX(title1HBox), ignoreTagLabel, FALSE, FALSE, 0);
 
-    GtkWidget *removeTagEdit = gtk_entry_new();
-    gtk_widget_set_size_request(removeTagEdit, 600, 0);
-    gtk_box_pack_start(GTK_BOX(title1HBox), removeTagEdit, TRUE, TRUE, 0);
+    ignoreTagEdit = gtk_entry_new();
+    gtk_widget_set_size_request(ignoreTagEdit, 600, 0);
+    gtk_box_pack_start(GTK_BOX(title1HBox), ignoreTagEdit, TRUE, TRUE, 0);
+    g_signal_connect(G_OBJECT(filterTagEdit), "activate", G_CALLBACK(enterClicked), NULL);
+
+
+    // 确定按钮
+    GtkWidget *enterButton = gtk_button_new_with_label("确定");
+    gtk_widget_set_size_request(enterButton, 200, 0);
+    gtk_box_pack_start(GTK_BOX(title1HBox), enterButton, FALSE, FALSE, 0);
+    g_signal_connect(G_OBJECT(enterButton), "clicked", G_CALLBACK(enterClicked), NULL);
+
 
     // left log dir list
     initLogList(content2LeftVBox);
 
     // text
     GtkWidget *textView = gtk_text_view_new();
-    gtk_widget_set_size_request(removeTagEdit, 600, 0);
+    gtk_widget_set_size_request(ignoreTagEdit, 600, 0);
 
 
-    gtk_widget_override_background_color(textView, GTK_STATE_FLAG_NORMAL, parseGdkRgba(0, 0, 0, 1));
-    gtk_widget_override_background_color(textView, GTK_STATE_FLAG_SELECTED, parseGdkRgba(0, 0.4, 0.4, 1));
-    gtk_widget_override_color(textView, GTK_STATE_FLAG_NORMAL, parseGdkRgba(1, 1, 1, 1));
+    gtk_widget_override_background_color(textView, GTK_STATE_FLAG_NORMAL, Utils::parseGdkRgba(0, 0, 0, 1));
+    gtk_widget_override_background_color(textView, GTK_STATE_FLAG_SELECTED, Utils::parseGdkRgba(0, 0.4, 0.4, 1));
+    gtk_widget_override_color(textView, GTK_STATE_FLAG_NORMAL, Utils::parseGdkRgba(1, 1, 1, 1));
 
 
     gtk_container_add(GTK_CONTAINER(content2RightBox), textView);
     gtk_text_view_set_editable(GTK_TEXT_VIEW(textView), TRUE);
+    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textView));
 
-    LogFilter *logFilter = new LogFilter("/home/xy/1b/.log");
+
+    logFilter = new LogFilter("/home/xy/1b/.log");
 
 
-    ininTextView(textView, logFilter);
+
 
 
     //显示主窗口控件及其所有子控件
